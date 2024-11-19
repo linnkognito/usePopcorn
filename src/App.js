@@ -72,10 +72,10 @@ export default function App() {
         const data = await res.json();
 
         setMovies(data.Search);
-        setIsLoading(false);
       } catch (err) {
-        console.error(err.message);
         setError(err.message);
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchMovies();
@@ -89,7 +89,12 @@ export default function App() {
       </NavBar>
 
       <Main>
-        <Box>{isLoading ? <Loader /> : <MovieList movies={movies} />}</Box>
+        <Box>
+          {isLoading && <Loader />}
+          {!isLoading && !error && <MovieList movies={movies} />}
+          {error && <ErrorMessage message={error} />}
+        </Box>
+
         <Box>
           <WatchedSummary watched={watched} />
           <WatchedMoviesList watched={watched} />
@@ -105,7 +110,7 @@ function Loader() {
 }
 function ErrorMessage({ message }) {
   return (
-    <p>
+    <p className='error'>
       <span>⛔</span> {message}
     </p>
   );
