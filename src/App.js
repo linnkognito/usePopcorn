@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const tempMovieData = [
   {
@@ -23,7 +23,6 @@ const tempMovieData = [
       'https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg',
   },
 ];
-
 const tempWatchedData = [
   {
     imdbID: 'tt1375666',
@@ -46,13 +45,41 @@ const tempWatchedData = [
     userRating: 9,
   },
 ];
-
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
+const KEY = 'be17441d';
+
 export default function App() {
-  const [movies, setMovies] = useState(tempMovieData);
-  const [watched, setWatched] = useState(tempWatchedData);
+  const [movies, setMovies] = useState([]);
+  const [watched, setWatched] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const query = 'interstellar';
+
+  useEffect(function () {
+    async function fetchMovies() {
+      try {
+        setIsLoading(true);
+
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+        );
+
+        if (!res.ok)
+          throw new Error('Something went wrong with fetching movies');
+
+        const data = await res.json();
+
+        setMovies(data.Search);
+        setIsLoading(false);
+      } catch (err) {
+        console.error(err.message);
+        setError(err.message);
+      }
+    }
+    fetchMovies();
+  }, []);
 
   return (
     <>
@@ -62,7 +89,7 @@ export default function App() {
       </NavBar>
 
       <Main>
-        <Box>{<MovieList movies={movies} />}</Box>
+        <Box>{isLoading ? <Loader /> : <MovieList movies={movies} />}</Box>
         <Box>
           <WatchedSummary watched={watched} />
           <WatchedMoviesList watched={watched} />
@@ -72,7 +99,19 @@ export default function App() {
   );
 }
 
-//__N A V B A R______________//
+//__U I  F E E D B A C K______________//
+function Loader() {
+  return <p className='loader'>Loading...</p>;
+}
+function ErrorMessage({ message }) {
+  return (
+    <p>
+      <span>⛔</span> {message}
+    </p>
+  );
+}
+
+//__N A V B A R_______________________//
 function NavBar({ children }) {
   return (
     <nav className='nav-bar'>
@@ -110,12 +149,12 @@ function NumResults({ movies }) {
   );
 }
 
-//__M A I N__________________//
+//__M A I N___________________________//
 function Main({ children }) {
   return <main className='main'>{children}</main>;
 }
 
-//__L I S T  B O X___________//
+//__L I S T  B O X____________________//
 function Box({ children }) {
   const [isOpen, setIsOpen] = useState(true);
 
@@ -153,7 +192,7 @@ function Movie({ movie }) {
   );
 }
 
-//__W A T C H E D  B O X_____//
+//__W A T C H E D  B O X______________//
 
 function WatchedSummary({ watched }) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
