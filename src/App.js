@@ -52,7 +52,7 @@ const average = (arr) => {
 const KEY = 'be17441d';
 
 export default function App() {
-  const [query, setQuery] = useState('inception');
+  const [query, setQuery] = useState('');
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -96,9 +96,8 @@ export default function App() {
           setMovies(data.Search);
           setError('');
         } catch (err) {
-          console.log(err.message);
-
           if (err.name !== 'AbortError') setError(err.message);
+          console.log(err.message);
         } finally {
           setIsLoading(false);
         }
@@ -109,6 +108,8 @@ export default function App() {
         setError('');
         return;
       }
+
+      handleCloseMovie();
       fetchMovies();
 
       return function () {
@@ -292,7 +293,6 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
       function callback(e) {
         if (e.code === 'Escape') {
           onCloseMovie();
-          console.log(`Closing!`);
         }
       }
 
