@@ -106,7 +106,6 @@ function Search({ query, setQuery }) {
   // Calling custom hook
   useKey('Enter', function () {
     if (document.activeElement === inputEl.current) return;
-
     inputEl.current.focus();
     setQuery('');
   });
